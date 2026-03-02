@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Sales Activity · 8 Sales + Admin</title>
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts - Barlow -->
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@700;800&display=swap" rel="stylesheet">
+    <!-- XLSX library -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Barlow', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        body {
+            background: #e8f5e9;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 12px;
+        }
+        
+        .card {
+            max-width: 520px;
+            width: 100%;
+            background: white;
+            border-radius: 36px;
+            box-shadow: 0 20px 35px -8px rgba(0, 80, 60, 0.2);
+            overflow: hidden;
+            padding: 32px 24px;
+            transition: all 0.2s;
+            border: 2px solid #4caf9e;
+        }
+        
+        .login-logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+        
+        .logo-text {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #2e7d73;
+            text-align: center;
+            line-height: 1.2;
+            letter-spacing: -0.5px;
+            text-transform: uppercase;
+            font-family: 'Barlow', sans-serif;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0, 100, 80, 0.1);
+        }
+        
+        .logo-sub {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #4caf9e;
+            letter-spacing: 4px;
+        }
+        
+        .login-container {
+            background: #d4ede8;
+            border-radius: 30px;
+            padding: 20px;
+            margin-bottom: 10px;
+            text-align: center;
+            border: 2px solid #4caf9e;
+        }
+        /* ===== SELECT SALES ===== */
+        
+        .section-title {
+            text-align: left;
+            font-weight: 700;
+            color: #1b5e4a;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .sales-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+            max-height: 360px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+        
+        .sales-grid::-webkit-scrollbar {
+            width: 5px;
+        }
+        
+        .sales-grid::-webkit-scrollbar-track {
+            background: #e6f3ef;
+            border-radius: 10px;
+        }
+        
+        .sales-grid::-webkit-scrollbar-thumb {
+            background: #4caf9e;
+            border-radius: 10px;
+        }
+        
+        .sales-card {
+            background: white;
+            border: 2px solid #4caf9e;
+            border-radius: 20px;
+            padding: 12px 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .sales-card:hover {
+            background: #e6f3ef;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(46, 125, 115, 0.2);
+        }
+        
+        .sales-card.selected {
+            background: #2e7d73;
+            border-color: #1b5e4a;
+        }
+        
+        .sales-card.selected .sales-name,
+        .sales-card.selected .sales-role {
+            color: white;
+        }
+        
+        .sales-avatar {
+            width: 50px;
+            height: 50px;
+            background: #d4ede8;
+            border-radius: 25px;
+            margin: 0 auto 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #2e7d73;
+            border: 2px solid #4caf9e;
+        }
+        
+        .sales-card.selected .sales-avatar {
+            background: white;
+            color: #2e7d73;
+        }
+        
+        .sales-name {
+            font-weight: 700;
+            color: #1b5e4a;
+            margin-bottom: 2px;
+            font-size: 0.9rem;
+        }
+        
+        .sales-role {
+            font-size: 0.65rem;
+            color: #4caf9e;
+            font-weight: 600;
+            background: #e6f3ef;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+        
+        .sales-card.selected .sales-role {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .password-section {
+            background: white;
+            border-radius: 20px;
+            padding: 16px;
+            border: 2px solid #4caf9e;
+            margin-top: 10px;
+        }
+        
+        .selected-sales-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding: 10px;
+            background: #e6f3ef;
+            border-radius: 16px;
+        }
+        
+        .selected-avatar {
+            width: 45px;
+            height: 45px;
+            background: #2e7d73;
+            border-radius: 23px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.3rem;
+        }
+        
+        .selected-details {
+            flex: 1;
+            text-align: left;
+        }
+        
+        .selected-name {
+            font-weight: 700;
+            color: #1b5e4a;
+            font-size: 1rem;
+        }
+        
+        .login-password {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid #4caf9e;
+            border-radius: 40px;
+            font-size: 1rem;
+            margin-bottom: 14px;
+            outline: none;
+            background: #f9fffe;
+        }
+        
+        .login-password:focus {
+            border-color: #1b5e4a;
+            box-shadow: 0 0 0 3px rgba(46, 125, 115, 0.2);
+        }
+        
+        .login-submit {
+            background: #2e7d73;
+            border: none;
+            border-radius: 40px;
+            padding: 16px;
+            font-weight: 700;
+            color: white;
+            width: 100%;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-bottom: 8px;
+            border: 2px solid #1b5e4a;
+            transition: all 0.2s;
+        }
+        
+        .login-submit:hover:not(:disabled) {
+            background: #1b5e4a;
+        }
+        
+        .login-submit:disabled {
+            background: #a0d6cc;
+            cursor: not-allowed;
+            border-color: #a0d6cc;
+        }
+        
+        .admin-login-link {
+            margin-top: 16px;
+            text-align: center;
+        }
+        
+        .admin-login-btn {
+            background: transparent;
+            border: 2px solid #4caf9e;
+            border-radius: 30px;
+            padding: 12px 24px;
+            color: #2e7d73;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            font-size: 1rem;
+        }
+        
+        .admin-login-btn:hover {
+            background: #4caf9e;
+            color: white;
+        }
+        
+        .admin-login-btn i {
+            margin-right: 8px;
+        }
+        
+        .session-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #d4ede8;
+            border-radius: 50px;
+            padding: 12px 18px;
+            margin-bottom: 20px;
+            border: 2px solid #4caf9e;
+        }
+        
+        .sales-badge {
+            background: #2e7d73;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .logout-btn {
+            background: transparent;
+            border: 2px solid #2e7d73;
+            border-radius: 30px;
+            padding: 8px 18px;
+            font-weight: 600;
+            color: #1b5e4a;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .logout-btn:hover {
+            background: #2e7d73;
+            color: white;
+        }
+        
+        .dashboard-stats {
+            background: #d4ede8;
+            border-radius: 28px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            text-align: center;
+            border: 2px solid #4caf9e;
+        }
+        
+        .stat-item {
+            padding: 8px;
+            background: white;
+            border-radius: 18px;
+            border: 1px solid #4caf9e;
+        }
+        
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #1b5e4a;
+            line-height: 1.2;
+        }
+        
+        .stat-label {
+            font-size: 0.7rem;
+            color: #2e7d73;
+            font-weight: 600;
+        }
+        
+        .filter-section {
+            background: white;
+            border-radius: 20px;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 2px solid #4caf9e;
+        }
+        
+        .filter-title {
+            font-weight: 700;
+            color: #1b5e4a;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .sales-filter-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+        }
+        
+        .filter-chip {
+            background: #e6f3ef;
+            border: 1px solid #4caf9e;
+            border-radius: 20px;
+            padding: 6px 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #1b5e4a;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        
+        .filter-chip:hover {
+            background: #d4ede8;
+        }
+        
+        .filter-chip.active {
+            background: #2e7d73;
+            color: white;
+            border-color: #1b5e4a;
+        }
+        
+        .data-section {
+            background: #d4ede8;
+            border-radius: 28px;
+            padding: 16px;
+            margin-bottom: 20px;
+            max-height: 350px;
+            overflow-y: auto;
+            border: 2px solid #4caf9e;
+        }
+        
+        .data-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-weight: 700;
+            color: #1b5e4a;
+        }
+        
+        .entry-item {
+            background: white;
+            border-radius: 18px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+            font-size: 0.8rem;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 4px 8px;
+            border: 1px solid #4caf9e;
+            position: relative;
+        }
+        
+        .entry-sales-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #2e7d73;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.6rem;
+            font-weight: 600;
+        }
+        
+        .entry-item .label {
+            color: #2e7d73;
+            font-weight: 600;
+        }
+        
+        .entry-item a {
+            color: #2e7d73;
+            text-decoration: none;
+            word-break: break-all;
+        }
+        
+        .entry-item a:hover {
+            text-decoration: underline;
+        }
+        
+        .field {
+            background: #f0faf7;
+            border-radius: 20px;
+            padding: 6px 16px 6px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 64px;
+            border: 2px solid #4caf9e;
+        }
+        
+        .field-icon {
+            font-size: 1.5rem;
+            min-width: 32px;
+            color: #2e7d73;
+        }
+        
+        .field-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .field-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #4caf9e;
+        }
+        
+        .field-input {
+            border: none;
+            background: transparent;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #1b5e4a;
+            width: 100%;
+            padding: 4px 0;
+            outline: none;
+        }
+        
+        .field-input:read-only {
+            color: #2e7d73;
+            font-weight: 700;
+        }
+        
+        .field-input::placeholder {
+            color: #a0d6cc;
+        }
+        
+        .datetime-row {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .action-button {
+            background: #e6f3ef;
+            border: none;
+            border-radius: 18px;
+            padding: 10px 16px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #1b5e4a;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            border: 2px solid #4caf9e;
+            transition: all 0.2s;
+        }
+        
+        .action-button:hover {
+            background: #d4ede8;
+        }
+        
+        .action-button.small {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+        
+        .photo-preview-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .photo-thumb {
+            width: 50px;
+            height: 50px;
+            background: #cfede5;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 2px solid #4caf9e;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .photo-thumb:hover {
+            transform: scale(1.1);
+        }
+        
+        .location-indicator {
+            font-size: 0.85rem;
+            color: #1b5e4a;
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+        }
+        
+        .location-indicator:hover {
+            text-decoration: underline;
+        }
+        
+        .btn-primary {
+            background: #2e7d73;
+            border: none;
+            border-radius: 40px;
+            padding: 16px 22px;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            cursor: pointer;
+            margin: 16px 0;
+            border: 2px solid #1b5e4a;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary:hover {
+            background: #1b5e4a;
+        }
+        
+        .btn-export {
+            background: #4caf9e;
+            border: none;
+            border-radius: 40px;
+            padding: 16px;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            cursor: pointer;
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+            border: 2px solid #2e7d73;
+            transition: all 0.2s;
+        }
+        
+        .btn-export:hover {
+            background: #2e7d73;
+        }
+        
+        .btn-reset {
+            background: #c0392b;
+            border: none;
+            border-radius: 40px;
+            padding: 16px;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            cursor: pointer;
+            font-size: 1.1rem;
+            margin-top: 8px;
+            border: 2px solid #a0322b;
+            transition: all 0.2s;
+        }
+        
+        .btn-reset:hover {
+            background: #a0322b;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .photo-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            cursor: pointer;
+        }
+        
+        .photo-modal img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            border-radius: 12px;
+            border: 3px solid #4caf9e;
+        }
+        
+        .photo-info {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: white;
+            background: rgba(46, 125, 115, 0.8);
+            padding: 10px;
+            font-size: 0.9rem;
+            border-radius: 30px;
+            margin: 0 20px;
+        }
+        
+        .maps-link {
+            color: #2e7d73;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.8rem;
+        }
+        
+        .maps-link:hover {
+            text-decoration: underline;
+        }
+        
+        input[type="date"]::-webkit-calendar-picker-indicator,
+        input[type="time"]::-webkit-calendar-picker-indicator {
+            filter: invert(0.5) sepia(1) hue-rotate(120deg);
+        }
+        
+        .text-small {
+            font-size: 0.7rem;
+            color: #4caf9e;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .button-group .btn-export {
+            margin-bottom: 0;
+            flex: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card" id="appCard">
+        <!-- ========== LOGIN SECTION (SALES) ========== -->
+        <div id="loginSection">
+            <div class="login-logo-container">
+                <div class="logo-text">
+                    NAINA<br>MANDIRI UTAMA
+                </div>
+                <div class="logo-sub">SALES ACTIVITY</div>
+            </div>
+
+            <div class="login-container">
+                <!-- Pilih Sales (8 sales) -->
+                <div class="section-title">
+                    <i class="fas fa-users"></i> Pilih Sales
+                </div>
+
+                <div class="sales-grid" id="salesGrid">
+                    <!-- Sales cards akan diisi JavaScript -->
+                </div>
+
+                <!-- Area Password -->
+                <div class="password-section" id="passwordSection" style="display: none;">
+                    <div class="selected-sales-info" id="selectedSalesInfo">
+                        <div class="selected-avatar" id="selectedAvatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="selected-details">
+                            <div class="selected-name" id="selectedName">-</div>
+                        </div>
+                    </div>
+
+                    <input type="password" class="login-password" id="passwordInput" placeholder="masukkan password" autocomplete="off">
+                    <button class="login-submit" id="loginSubmitBtn" disabled>
+                        <i class="fas fa-sign-in-alt"></i> Masuk
+                    </button>
+                </div>
+
+                <!-- Link ke Admin -->
+                <div class="admin-login-link">
+                    <button class="admin-login-btn" id="adminLoginBtn">
+                        <i class="fas fa-shield-alt"></i> Login sebagai Admin
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== ADMIN LOGIN SECTION ========== -->
+        <div id="adminLoginSection" class="hidden">
+            <div class="login-logo-container">
+                <div class="logo-text">
+                    NAINA<br>MANDIRI UTAMA
+                </div>
+                <div class="logo-sub">ADMIN PANEL</div>
+            </div>
+
+            <div class="login-container">
+                <div style="margin-bottom: 20px; text-align: left;">
+                    <button class="action-button small" id="backToSalesBtn">
+                        <i class="fas fa-arrow-left"></i> Kembali
+                    </button>
+                </div>
+
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <i class="fas fa-shield-alt" style="font-size: 3rem; color: #2e7d73;"></i>
+                    <h3 style="color: #1b5e4a; margin-top: 10px;">Admin Login</h3>
+                    <div class="text-small">Masukkan password admin</div>
+                </div>
+
+                <input type="password" class="login-password" id="adminPasswordInput" placeholder="password admin" autocomplete="off">
+                <button class="login-submit" id="adminLoginSubmitBtn">
+                    <i class="fas fa-sign-in-alt"></i> Masuk sebagai Admin
+                </button>
+            </div>
+        </div>
+
+        <!-- ========== USER SECTION (SALES) ========== -->
+        <div id="userSection" class="hidden">
+            <div class="session-info">
+                <span>
+                    <i class="fas fa-user"></i> 
+                    <span id="userNameDisplay">Sales</span>
+                </span>
+                <button class="logout-btn" id="logoutFromUser"><i class="fas fa-sign-out-alt"></i> logout</button>
+            </div>
+
+            <div class="input-grid">
+                <div class="field">
+                    <div class="field-icon"><i class="fas fa-user-circle"></i></div>
+                    <div class="field-content">
+                        <span class="field-label">nama sales</span>
+                        <input type="text" class="field-input" id="salesName" readonly>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="field-icon"><i class="fas fa-store"></i></div>
+                    <div class="field-content">
+                        <span class="field-label">nama outlet</span>
+                        <input type="text" class="field-input" id="outletName" placeholder="Toko Sembada">
+                    </div>
+                </div>
+                <div class="datetime-row">
+                    <div class="field">
+                        <div class="field-icon"><i class="fas fa-calendar-alt"></i></div>
+                        <div class="field-content">
+                            <span class="field-label">tanggal</span>
+                            <input type="date" class="field-input" id="visitDate">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="field-icon"><i class="fas fa-clock"></i></div>
+                        <div class="field-content">
+                            <span class="field-label">pukul</span>
+                            <input type="time" class="field-input" id="visitTime">
+                        </div>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="field-icon"><i class="fas fa-phone-alt"></i></div>
+                    <div class="field-content">
+                        <span class="field-label">no tlp outlet</span>
+                        <input type="tel" class="field-input" id="outletPhone" placeholder="08123456789">
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="field-icon"><i class="fas fa-map-pin"></i></div>
+                    <div class="field-content">
+                        <span class="field-label">alamat</span>
+                        <input type="text" class="field-input" id="outletAddress" placeholder="Jl. Sudirman no 10">
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="field-icon"><i class="fas fa-camera"></i></div>
+                    <div class="field-content">
+                        <span class="field-label">foto kunjungan</span>
+                        <div class="photo-preview-area">
+                            <button class="action-button" id="takePhotoBtn"><i class="fas fa-camera-retro"></i> ambil gambar</button>
+                            <img id="photoPreview" class="photo-thumb" src="https://placehold.co/50x50/d4ede8/2e7d73?text=foto" onclick="window.open(this.src)">
+                            <span id="photoName" style="font-size:0.75rem; color:#2e7d73;"></span>
+                        </div>
+                        <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;">
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="field-icon"><i class="fas fa-location-dot"></i></div>
+                    <div class="field-content">
+                        <span class="field-label">lokasi (Google Maps)</span>
+                        <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                            <span class="location-indicator" id="locationText" onclick="openGoogleMaps()">📍 posisi belum diambil</span>
+                            <button class="action-button small" id="getLocationBtn"><i class="fas fa-satellite-dish"></i> ambil</button>
+                        </div>
+                        <div id="mapsLinkContainer" style="margin-top:5px; display:none;">
+                            <a href="#" id="mapsLink" target="_blank" class="maps-link"><i class="fas fa-map-marked-alt"></i> Buka di Google Maps</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button class="btn-primary" id="saveButton"><i class="fas fa-check-circle"></i> Simpan Kunjungan</button>
+        </div>
+
+        <!-- ========== ADMIN SECTION ========== -->
+        <div id="adminSection" class="hidden">
+            <div class="session-info">
+                <span>
+                    <i class="fas fa-shield-alt"></i> Admin
+                </span>
+                <button class="logout-btn" id="logoutFromAdmin"><i class="fas fa-sign-out-alt"></i> logout</button>
+            </div>
+
+            <!-- Dashboard statistik -->
+            <div class="dashboard-stats">
+                <div class="stat-item">
+                    <div class="stat-number" id="totalKunjungan">0</div>
+                    <div class="stat-label">Total Kunjungan</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="totalSales">0</div>
+                    <div class="stat-label">Sales Aktif</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="totalOutlet">0</div>
+                    <div class="stat-label">Outlet</div>
+                </div>
+            </div>
+
+            <!-- Filter by Sales -->
+            <div class="filter-section">
+                <div class="filter-title">
+                    <i class="fas fa-filter"></i> Filter by Sales:
+                </div>
+                <div class="sales-filter-grid" id="salesFilter">
+                    <!-- Filter chips akan diisi JavaScript -->
+                </div>
+            </div>
+
+            <!-- Data kunjungan -->
+            <div class="data-header">
+                <span><i class="fas fa-clipboard-list"></i> Data Kunjungan</span>
+                <span id="adminDataCount">0</span>
+            </div>
+            <div class="data-section" id="adminDataList">
+                <div class="empty-data">Belum ada data</div>
+            </div>
+
+            <!-- Tombol Export & Reset -->
+            <div class="button-group">
+                <button class="btn-export" id="adminExportBtn"><i class="fas fa-file-excel"></i> Export Excel</button>
+                <button class="btn-reset" id="adminResetBtn"><i class="fas fa-trash-alt"></i> Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal untuk melihat foto full size -->
+    <div id="photoModal" class="photo-modal hidden" onclick="closeModal()">
+        <img id="modalImage" src="" alt="Foto kunjungan">
+        <div class="photo-info" id="modalInfo"></div>
+    </div>
+
+    <script>
+        (function() {
+            // ========== DATA SALES (8 sales) ==========
+            const SALES_DATA = [{
+                id: 1,
+                name: 'Agus Efendi',
+                password: 'agus123',
+                avatar: 'AE',
+                role: 'Sales Asli'
+            }, {
+                id: 2,
+                name: 'Bustomi Aji',
+                password: 'tomi123',
+                avatar: 'BA',
+                role: 'Sales Asli'
+            }, {
+                id: 3,
+                name: 'Khoirus Sobah',
+                password: 'sobah123',
+                avatar: 'KS',
+                role: 'Sales Asli'
+            }, {
+                id: 4,
+                name: 'Misbahul Khoir',
+                password: 'peter123',
+                avatar: 'MK',
+                role: 'Sales Asli'
+            }, {
+                id: 5,
+                name: 'Muhamad Rofik',
+                password: 'opik123',
+                avatar: 'MR',
+                role: 'Sales Asli'
+            }, {
+                id: 6,
+                name: 'Maryadih Cahya',
+                password: 'cahya123',
+                avatar: 'MC',
+                role: 'Sales Asli'
+            }, {
+                id: 7,
+                name: 'Najat Soemantri',
+                password: 'najat123',
+                avatar: 'NS',
+                role: 'Senior Sales'
+            }, {
+                id: 8,
+                name: 'Sudirman',
+                password: 'slamet123',
+                avatar: 'S',
+                role: 'Sales Manager'
+            }];
+
+            const ADMIN_PASSWORD = 'rahasia17';
+
+            // ========== ELEMEN ==========
+            const loginSection = document.getElementById('loginSection');
+            const adminLoginSection = document.getElementById('adminLoginSection');
+            const userSection = document.getElementById('userSection');
+            const adminSection = document.getElementById('adminSection');
+
+            const salesGrid = document.getElementById('salesGrid');
+            const passwordSection = document.getElementById('passwordSection');
+            const selectedAvatar = document.getElementById('selectedAvatar');
+            const selectedName = document.getElementById('selectedName');
+            const passwordInput = document.getElementById('passwordInput');
+            const loginSubmitBtn = document.getElementById('loginSubmitBtn');
+
+            const adminLoginBtn = document.getElementById('adminLoginBtn');
+            const backToSalesBtn = document.getElementById('backToSalesBtn');
+            const adminPasswordInput = document.getElementById('adminPasswordInput');
+            const adminLoginSubmitBtn = document.getElementById('adminLoginSubmitBtn');
+
+            const logoutUser = document.getElementById('logoutFromUser');
+            const logoutAdmin = document.getElementById('logoutFromAdmin');
+
+            const userNameDisplay = document.getElementById('userNameDisplay');
+            const salesName = document.getElementById('salesName');
+
+            // ========== STATE ==========
+            let selectedSales = null;
+            let visits = [];
+            let currentFilter = 'all';
+
+            // ========== LOAD DATA ==========
+            function loadVisits() {
+                const stored = localStorage.getItem('salesVisits');
+                if (stored) {
+                    try {
+                        visits = JSON.parse(stored);
+                    } catch {
+                        visits = [];
+                    }
+                } else {
+                    visits = [];
+                }
+            }
+            loadVisits();
+
+            function saveVisits() {
+                localStorage.setItem('salesVisits', JSON.stringify(visits));
+            }
+
+            // ========== RENDER SALES GRID ==========
+            function renderSalesGrid() {
+                let html = '';
+                SALES_DATA.forEach(sales => {
+                    html += `
+                        <div class="sales-card" data-id="${sales.id}" data-name="${sales.name}" data-password="${sales.password}" data-role="${sales.role}">
+                            <div class="sales-avatar">${sales.avatar}</div>
+                            <div class="sales-name">${sales.name}</div>
+                            <div class="sales-role">${sales.role}</div>
+                        </div>
+                    `;
+                });
+                salesGrid.innerHTML = html;
+
+                // Add click event to sales cards
+                document.querySelectorAll('.sales-card').forEach(card => {
+                    card.addEventListener('click', () => {
+                        // Remove selected class from all cards
+                        document.querySelectorAll('.sales-card').forEach(c => c.classList.remove('selected'));
+                        // Add selected class to clicked card
+                        card.classList.add('selected');
+
+                        // Get sales data
+                        selectedSales = {
+                            id: card.dataset.id,
+                            name: card.dataset.name,
+                            password: card.dataset.password,
+                            role: card.dataset.role
+                        };
+
+                        // Update selected info
+                        selectedAvatar.innerHTML = `<i class="fas fa-user"></i>`;
+                        selectedName.textContent = selectedSales.name;
+
+                        // Show password section
+                        passwordSection.style.display = 'block';
+                        passwordInput.value = '';
+                        loginSubmitBtn.disabled = false;
+                        passwordInput.focus();
+                    });
+                });
+            }
+
+            // ========== RENDER FILTER SALES (ADMIN) ==========
+            function renderSalesFilter() {
+                const filterGrid = document.getElementById('salesFilter');
+                let html = '<div class="filter-chip active" data-filter="all">Semua</div>';
+
+                SALES_DATA.forEach(sales => {
+                    html += `<div class="filter-chip" data-filter="${sales.name}">${sales.name.split(' ')[0]}</div>`;
+                });
+
+                filterGrid.innerHTML = html;
+
+                // Add click events
+                document.querySelectorAll('.filter-chip').forEach(chip => {
+                    chip.addEventListener('click', () => {
+                        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+                        chip.classList.add('active');
+                        currentFilter = chip.dataset.filter;
+                        renderAdminDashboard();
+                    });
+                });
+            }
+
+            // ========== RENDER ADMIN DASHBOARD ==========
+            function renderAdminDashboard() {
+                const totalKunjungan = document.getElementById('totalKunjungan');
+                const totalSales = document.getElementById('totalSales');
+                const totalOutlet = document.getElementById('totalOutlet');
+                const adminDataList = document.getElementById('adminDataList');
+                const adminDataCount = document.getElementById('adminDataCount');
+
+                // Filter data based on selected sales
+                let filteredVisits = visits;
+                if (currentFilter !== 'all') {
+                    filteredVisits = visits.filter(v => v.sales === currentFilter);
+                }
+
+                // Statistics
+                totalKunjungan.innerText = filteredVisits.length;
+
+                const activeSales = new Set(filteredVisits.map(v => v.sales).filter(Boolean));
+                totalSales.innerText = activeSales.size;
+
+                const uniqueOutlets = new Set(filteredVisits.map(v => v.outlet).filter(Boolean));
+                totalOutlet.innerText = uniqueOutlets.size;
+
+                adminDataCount.innerText = filteredVisits.length;
+
+                // Render data list
+                if (filteredVisits.length === 0) {
+                    adminDataList.innerHTML = '<div class="empty-data">Belum ada kunjungan</div>';
+                } else {
+                    let html = '';
+                    filteredVisits.slice().reverse().forEach(v => {
+                        const mapsLink = v.mapsUrl ?
+                            `<a href="${v.mapsUrl}" target="_blank" class="maps-link"><i class="fas fa-map-marked-alt"></i> Buka Maps</a>` :
+                            '-';
+
+                        const fotoThumb = v.fotoBase64 ?
+                            `<img src="${v.fotoBase64}" class="photo-thumb" onclick="showPhoto('${v.fotoBase64}', '${v.outlet} - ${v.tanggal} (${v.sales})')">` :
+                            '-';
+
+                        html += `<div class="entry-item">
+                            <span class="entry-sales-badge">${v.sales || 'N/A'}</span>
+                            <span class="label">Sales:</span> <span>${escapeHtml(v.sales)}</span>
+                            <span class="label">Outlet:</span> <span>${escapeHtml(v.outlet)}</span>
+                            <span class="label">Tgl/Jam:</span> <span>${escapeHtml(v.tanggal)} ${escapeHtml(v.pukul)}</span>
+                            <span class="label">No HP:</span> <span>${escapeHtml(v.phone)}</span>
+                            <span class="label">Alamat:</span> <span>${escapeHtml(v.alamat)}</span>
+                            <span class="label">Lokasi:</span> <span>${escapeHtml(v.lokasi)}<br>${mapsLink}</span>
+                            <span class="label">Foto:</span> <span>${fotoThumb}</span>
+                        </div>`;
+                    });
+                    adminDataList.innerHTML = html;
+                }
+            }
+
+            // ========== LOGIN SALES ==========
+            loginSubmitBtn.addEventListener('click', () => {
+                if (!selectedSales) {
+                    alert('Pilih sales terlebih dahulu!');
+                    return;
+                }
+
+                const password = passwordInput.value.trim();
+                if (password === selectedSales.password) {
+                    // Set user info
+                    userNameDisplay.textContent = selectedSales.name;
+                    salesName.value = selectedSales.name;
+
+                    // Switch to user section
+                    loginSection.classList.add('hidden');
+                    adminLoginSection.classList.add('hidden');
+                    userSection.classList.remove('hidden');
+                    adminSection.classList.add('hidden');
+
+                    // Reset login form
+                    passwordInput.value = '';
+                    passwordSection.style.display = 'none';
+                    document.querySelectorAll('.sales-card').forEach(c => c.classList.remove('selected'));
+                    selectedSales = null;
+
+                    // Set default datetime
+                    setDefaultDateTime();
+                } else {
+                    alert('Password salah!');
+                    passwordInput.value = '';
+                    passwordInput.focus();
+                }
+            });
+
+            // ========== LOGIN ADMIN ==========
+            adminLoginBtn.addEventListener('click', () => {
+                loginSection.classList.add('hidden');
+                adminLoginSection.classList.remove('hidden');
+                adminPasswordInput.focus();
+            });
+
+            backToSalesBtn.addEventListener('click', () => {
+                adminLoginSection.classList.add('hidden');
+                loginSection.classList.remove('hidden');
+                adminPasswordInput.value = '';
+            });
+
+            adminLoginSubmitBtn.addEventListener('click', () => {
+                const password = adminPasswordInput.value.trim();
+                if (password === ADMIN_PASSWORD) {
+                    loginSection.classList.add('hidden');
+                    adminLoginSection.classList.add('hidden');
+                    userSection.classList.add('hidden');
+                    adminSection.classList.remove('hidden');
+
+                    renderSalesFilter();
+                    renderAdminDashboard();
+
+                    adminPasswordInput.value = '';
+                } else {
+                    alert('Password admin salah!');
+                    adminPasswordInput.value = '';
+                    adminPasswordInput.focus();
+                }
+            });
+
+            // ========== LOGOUT ==========
+            function logout() {
+                loginSection.classList.remove('hidden');
+                adminLoginSection.classList.add('hidden');
+                userSection.classList.add('hidden');
+                adminSection.classList.add('hidden');
+
+                // Reset
+                selectedSales = null;
+                passwordSection.style.display = 'none';
+                document.querySelectorAll('.sales-card').forEach(c => c.classList.remove('selected'));
+                currentFilter = 'all';
+            }
+
+            logoutUser.addEventListener('click', logout);
+            logoutAdmin.addEventListener('click', logout);
+
+            // ========== FITUR USER ==========
+            const outletName = document.getElementById('outletName');
+            const visitDate = document.getElementById('visitDate');
+            const visitTime = document.getElementById('visitTime');
+            const outletPhone = document.getElementById('outletPhone');
+            const outletAddress = document.getElementById('outletAddress');
+            const locationText = document.getElementById('locationText');
+            const mapsLinkContainer = document.getElementById('mapsLinkContainer');
+            const mapsLink = document.getElementById('mapsLink');
+            const photoPreview = document.getElementById('photoPreview');
+            const photoName = document.getElementById('photoName');
+            const cameraInput = document.getElementById('cameraInput');
+            const takePhotoBtn = document.getElementById('takePhotoBtn');
+            const getLocationBtn = document.getElementById('getLocationBtn');
+            const saveButton = document.getElementById('saveButton');
+
+            let currentLat = null;
+            let currentLng = null;
+            let currentPhotoBase64 = null;
+            let currentPhotoName = '';
+
+            function setDefaultDateTime() {
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                const dd = String(today.getDate()).padStart(2, '0');
+                visitDate.value = `${yyyy}-${mm}-${dd}`;
+                visitTime.value = `${String(today.getHours()).padStart(2,'0')}:${String(today.getMinutes()).padStart(2,'0')}`;
+            }
+
+            window.openGoogleMaps = function() {
+                if (currentLat && currentLng) {
+                    window.open(`https://www.google.com/maps?q=${currentLat},${currentLng}`, '_blank');
+                }
+            };
+
+            takePhotoBtn.addEventListener('click', () => cameraInput.click());
+
+            cameraInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    currentPhotoName = file.name;
+                    photoName.textContent = `📷 ${file.name.substring(0,15)}...`;
+
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        currentPhotoBase64 = ev.target.result;
+                        photoPreview.src = ev.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            getLocationBtn.addEventListener('click', () => {
+                if (!navigator.geolocation) {
+                    alert('Geolocation tidak didukung');
+                    return;
+                }
+                locationText.innerText = '⏳ mengambil lokasi...';
+                mapsLinkContainer.style.display = 'none';
+
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        currentLat = pos.coords.latitude;
+                        currentLng = pos.coords.longitude;
+
+                        const latFixed = currentLat.toFixed(6);
+                        const lngFixed = currentLng.toFixed(6);
+
+                        locationText.innerText = `📍 ${latFixed}, ${lngFixed}`;
+
+                        mapsLink.href = `https://www.google.com/maps?q=${currentLat},${currentLng}`;
+                        mapsLinkContainer.style.display = 'block';
+
+                        // Reverse geocoding
+                        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${currentLat}&lon=${currentLng}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.display_name && !outletAddress.value) {
+                                    outletAddress.value = data.display_name.split(',')[0];
+                                }
+                            })
+                            .catch(() => {});
+                    },
+                    (error) => {
+                        locationText.innerText = '⚠️ gagal ambil lokasi';
+                        console.error(error);
+                    }, {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    }
+                );
+            });
+
+            saveButton.addEventListener('click', () => {
+                const sales = salesName.value.trim() || '-';
+                const outlet = outletName.value.trim() || '-';
+                const tanggal = visitDate.value || '-';
+                const pukul = visitTime.value || '-';
+                const phone = outletPhone.value.trim() || '-';
+                const alamat = outletAddress.value.trim() || '-';
+
+                let lokasi = '-';
+                let mapsUrl = '';
+                if (currentLat && currentLng) {
+                    lokasi = `${currentLat.toFixed(6)}, ${currentLng.toFixed(6)}`;
+                    mapsUrl = `https://www.google.com/maps?q=${currentLat},${currentLng}`;
+                }
+
+                const newVisit = {
+                    id: Date.now(),
+                    sales,
+                    outlet,
+                    tanggal,
+                    pukul,
+                    phone,
+                    alamat,
+                    lokasi,
+                    mapsUrl,
+                    foto: currentPhotoBase64 ? 'ada' : 'tidak ada',
+                    fotoBase64: currentPhotoBase64,
+                    fotoName: currentPhotoName,
+                    timestamp: new Date().toISOString()
+                };
+
+                visits.push(newVisit);
+                saveVisits();
+
+                alert('✅ Kunjungan tersimpan!');
+
+                // Reset form
+                outletName.value = '';
+                outletPhone.value = '';
+                outletAddress.value = '';
+                currentPhotoBase64 = null;
+                currentPhotoName = '';
+                photoPreview.src = 'https://placehold.co/50x50/d4ede8/2e7d73?text=foto';
+                photoName.textContent = '';
+                locationText.innerText = '📍 posisi belum diambil';
+                mapsLinkContainer.style.display = 'none';
+                currentLat = null;
+                currentLng = null;
+                setDefaultDateTime();
+            });
+
+            // ========== MODAL FOTO ==========
+            window.showPhoto = function(base64, info) {
+                document.getElementById('modalImage').src = base64;
+                document.getElementById('modalInfo').textContent = info;
+                document.getElementById('photoModal').classList.remove('hidden');
+            };
+
+            window.closeModal = function() {
+                document.getElementById('photoModal').classList.add('hidden');
+            };
+
+            // ========== ESCAPE HTML ==========
+            function escapeHtml(unsafe) {
+                if (!unsafe) return '';
+                return String(unsafe)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;');
+            }
+
+            // ========== EXPORT EXCEL ==========
+            document.getElementById('adminExportBtn').addEventListener('click', () => {
+                if (visits.length === 0) {
+                    alert('Tidak ada data');
+                    return;
+                }
+
+                const rows = [
+                    ['Nama Sales', 'Tanggal', 'Pukul', 'Nama Outlet', 'No Telp', 'Alamat', 'Koordinat', 'Link Google Maps', 'Nama File Foto']
+                ];
+
+                visits.forEach(v => {
+                    rows.push([
+                        v.sales || '-',
+                        v.tanggal,
+                        v.pukul,
+                        v.outlet,
+                        v.phone,
+                        v.alamat,
+                        v.lokasi,
+                        v.mapsUrl || '-',
+                        v.fotoName || '-'
+                    ]);
+                });
+
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.aoa_to_sheet(rows);
+
+                XLSX.utils.book_append_sheet(wb, ws, "Kunjungan");
+                XLSX.writeFile(wb, `sales_data_${new Date().toISOString().slice(0,10)}.xlsx`);
+            });
+
+            // ========== RESET DATA ==========
+            document.getElementById('adminResetBtn').addEventListener('click', () => {
+                if (confirm('PERINGATAN: Semua data kunjungan akan dihapus permanen. Lanjutkan?')) {
+                    visits = [];
+                    saveVisits();
+                    renderAdminDashboard();
+                    alert('✅ Semua data telah direset.');
+                }
+            });
+
+            // ========== INIT ==========
+            renderSalesGrid();
+
+            // Enable login button only when password is entered
+            passwordInput.addEventListener('input', () => {
+                loginSubmitBtn.disabled = passwordInput.value.trim() === '';
+            });
+
+            // Enter key on password input
+            passwordInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !loginSubmitBtn.disabled) {
+                    loginSubmitBtn.click();
+                }
+            });
+
+            adminPasswordInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    adminLoginSubmitBtn.click();
+                }
+            });
+
+            // Click outside modal to close
+            document.getElementById('photoModal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('photoModal')) {
+                    closeModal();
+                }
+            });
+        })();
+    </script>
+</body>
+
+</html>
