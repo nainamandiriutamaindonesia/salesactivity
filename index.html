@@ -958,14 +958,14 @@
                 <div class="field">
                     <div class="field-icon"><i class="fas fa-map-signs"></i></div>
                     <div class="field-content">
-                        <span class="field-label">desa/kelurahan</span>
+                        <span class="field-label">kecamatan/desa</span>
                         <input type="text" class="field-input" id="kecamatan" placeholder="Kecamatan Suka Maju">
                     </div>
                 </div>
                 <div class="field">
                     <div class="field-icon"><i class="fas fa-map-marked-alt"></i></div>
                     <div class="field-content">
-                        <span class="field-label">kecamatan</span>
+                        <span class="field-label">kelurahan</span>
                         <input type="text" class="field-input" id="kelurahan" placeholder="Kelurahan Sejahtera">
                     </div>
                 </div>
@@ -1189,6 +1189,10 @@
             let visits = [];
             let currentFilter = 'all';
             let products = []; // Untuk menyimpan produk transaksi
+            let currentLat = null;
+            let currentLng = null;
+            let currentPhotoBase64 = null;
+            let currentPhotoName = '';
 
             // ========== LOAD DATA ==========
             function loadVisits() {
@@ -1207,6 +1211,38 @@
 
             function saveVisits() {
                 localStorage.setItem('salesVisits', JSON.stringify(visits));
+            }
+
+            // ========== RESET FORM USER ==========
+            function resetUserForm() {
+                // Reset semua field input
+                outletName.value = '';
+                outletPhone.value = '';
+                outletAddress.value = '';
+                kecamatanInput.value = '';
+                kelurahanInput.value = '';
+                kotaInput.value = '';
+                
+                // Reset foto
+                currentPhotoBase64 = null;
+                currentPhotoName = '';
+                photoPreview.src = 'https://placehold.co/50x50/d4ede8/2e7d73?text=foto';
+                photoName.textContent = '';
+                
+                // Reset lokasi
+                locationText.innerText = '📍 posisi belum diambil';
+                mapsLinkContainer.style.display = 'none';
+                currentLat = null;
+                currentLng = null;
+                
+                // Reset transaksi
+                products = [];
+                transactionStatus.value = 'none';
+                transactionForm.classList.add('hidden');
+                renderProducts();
+                
+                // Set default datetime
+                setDefaultDateTime();
             }
 
             // ========== RENDER SALES GRID ==========
@@ -1337,7 +1373,10 @@
                         // Tampilkan data alamat lengkap dengan kecamatan/desa, kelurahan, kota/kabupaten
                         let alamatLengkap = v.alamat || '-';
                         if (v.kecamatan || v.kelurahan || v.kota) {
-                            alamatLengkap += `<br>Kecamatan: ${escapeHtml(v.kecamatan || '-')}<br>Kelurahan: ${escapeHtml(v.kelurahan || '-')}<br>Kota/Kab: ${escapeHtml(v.kota || '-')}`;
+                            alamatLengkap += '<br>';
+                            if (v.kecamatan && v.kecamatan !== '-') alamatLengkap += `Kecamatan: ${escapeHtml(v.kecamatan)}<br>`;
+                            if (v.kelurahan && v.kelurahan !== '-') alamatLengkap += `Kelurahan: ${escapeHtml(v.kelurahan)}<br>`;
+                            if (v.kota && v.kota !== '-') alamatLengkap += `Kota/Kab: ${escapeHtml(v.kota)}`;
                         }
 
                         html += `<div class="entry-item">
@@ -1369,6 +1408,9 @@
                     userNameDisplay.textContent = selectedSales.name;
                     salesName.value = selectedSales.name;
 
+                    // Reset form user sebelum menampilkan
+                    resetUserForm();
+
                     // Switch to user section
                     loginSection.classList.add('hidden');
                     adminLoginSection.classList.add('hidden');
@@ -1380,12 +1422,6 @@
                     passwordSection.style.display = 'none';
                     document.querySelectorAll('.sales-card').forEach(c => c.classList.remove('selected'));
                     selectedSales = null;
-
-                    // Set default datetime
-                    setDefaultDateTime();
-
-                    // Reset transaksi
-                    resetTransactionForm();
                 } else {
                     alert('Password salah!');
                     passwordInput.value = '';
@@ -1397,6 +1433,7 @@
             adminLoginBtn.addEventListener('click', () => {
                 loginSection.classList.add('hidden');
                 adminLoginSection.classList.remove('hidden');
+                adminPasswordInput.value = '';
                 adminPasswordInput.focus();
             });
 
@@ -1432,11 +1469,18 @@
                 userSection.classList.add('hidden');
                 adminSection.classList.add('hidden');
 
-                // Reset
+                // Reset semua state
                 selectedSales = null;
                 passwordSection.style.display = 'none';
                 document.querySelectorAll('.sales-card').forEach(c => c.classList.remove('selected'));
                 currentFilter = 'all';
+                
+                // Reset form user
+                resetUserForm();
+                
+                // Reset password inputs
+                passwordInput.value = '';
+                adminPasswordInput.value = '';
             }
 
             logoutUser.addEventListener('click', logout);
@@ -1464,11 +1508,6 @@
             const productsContainer = document.getElementById('productsContainer');
             const addProductBtn = document.getElementById('addProductBtn');
             const grandTotal = document.getElementById('grandTotal');
-
-            let currentLat = null;
-            let currentLng = null;
-            let currentPhotoBase64 = null;
-            let currentPhotoName = '';
 
             function setDefaultDateTime() {
                 const today = new Date();
@@ -1532,20 +1571,20 @@
                                     if (!outletAddress.value && data.display_name) {
                                         outletAddress.value = data.display_name.split(',')[0] || '';
                                     }
-
+                                    
                                     // Isi field kecamatan/desa, kelurahan, kota/kabupaten jika kosong
                                     const address = data.address;
-
+                                    
                                     // Kecamatan/Desa
                                     if (!kecamatanInput.value) {
                                         kecamatanInput.value = address.suburb || address.village || address.town || address.county || '';
                                     }
-
+                                    
                                     // Kelurahan
                                     if (!kelurahanInput.value) {
                                         kelurahanInput.value = address.neighbourhood || address.suburb || address.village || address.hamlet || '';
                                     }
-
+                                    
                                     // Kota/Kabupaten
                                     if (!kotaInput.value) {
                                         kotaInput.value = address.city || address.town || address.county || address.state || '';
@@ -1722,7 +1761,7 @@
                 const pukul = visitTime.value || '-';
                 const phone = outletPhone.value.trim() || '-';
                 const alamat = outletAddress.value.trim() || '-';
-
+                
                 // Data tambahan
                 const kecamatan = kecamatanInput.value.trim() || '-';
                 const kelurahan = kelurahanInput.value.trim() || '-';
@@ -1769,9 +1808,9 @@
                     pukul,
                     phone,
                     alamat,
-                    kecamatan, // Data tambahan
-                    kelurahan, // Data tambahan
-                    kota, // Data tambahan
+                    kecamatan,
+                    kelurahan,
+                    kota,
                     lokasi,
                     mapsUrl,
                     foto: currentPhotoBase64 ? 'ada' : 'tidak ada',
@@ -1787,25 +1826,7 @@
                 alert('✅ Kunjungan tersimpan!');
 
                 // Reset form
-                outletName.value = '';
-                outletPhone.value = '';
-                outletAddress.value = '';
-                kecamatanInput.value = ''; // Reset field tambahan
-                kelurahanInput.value = ''; // Reset field tambahan
-                kotaInput.value = ''; // Reset field tambahan
-                currentPhotoBase64 = null;
-                currentPhotoName = '';
-                photoPreview.src = 'https://placehold.co/50x50/d4ede8/2e7d73?text=foto';
-                photoName.textContent = '';
-                locationText.innerText = '📍 posisi belum diambil';
-                mapsLinkContainer.style.display = 'none';
-                currentLat = null;
-                currentLng = null;
-
-                // Reset transaksi
-                resetTransactionForm();
-
-                setDefaultDateTime();
+                resetUserForm();
             });
 
             // ========== MODAL FOTO ==========
@@ -1848,9 +1869,9 @@
                         v.outlet,
                         v.phone,
                         v.alamat,
-                        v.kecamatan || '-', // Data tambahan
-                        v.kelurahan || '-', // Data tambahan
-                        v.kota || '-', // Data tambahan
+                        v.kecamatan || '-',
+                        v.kelurahan || '-',
+                        v.kota || '-',
                         v.lokasi,
                         v.mapsUrl || '-',
                         v.fotoName || '-',
