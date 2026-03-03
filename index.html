@@ -958,14 +958,14 @@
                 <div class="field">
                     <div class="field-icon"><i class="fas fa-map-signs"></i></div>
                     <div class="field-content">
-                        <span class="field-label">kecamatan/desa</span>
+                        <span class="field-label">kelurahan/desa</span>
                         <input type="text" class="field-input" id="kecamatan" placeholder="Kecamatan Suka Maju">
                     </div>
                 </div>
                 <div class="field">
                     <div class="field-icon"><i class="fas fa-map-marked-alt"></i></div>
                     <div class="field-content">
-                        <span class="field-label">kelurahan</span>
+                        <span class="field-label">kecamatan</span>
                         <input type="text" class="field-input" id="kelurahan" placeholder="Kelurahan Sejahtera">
                     </div>
                 </div>
@@ -1222,25 +1222,25 @@
                 kecamatanInput.value = '';
                 kelurahanInput.value = '';
                 kotaInput.value = '';
-                
+
                 // Reset foto
                 currentPhotoBase64 = null;
                 currentPhotoName = '';
                 photoPreview.src = 'https://placehold.co/50x50/d4ede8/2e7d73?text=foto';
                 photoName.textContent = '';
-                
+
                 // Reset lokasi
                 locationText.innerText = '📍 posisi belum diambil';
                 mapsLinkContainer.style.display = 'none';
                 currentLat = null;
                 currentLng = null;
-                
+
                 // Reset transaksi
                 products = [];
                 transactionStatus.value = 'none';
                 transactionForm.classList.add('hidden');
                 renderProducts();
-                
+
                 // Set default datetime
                 setDefaultDateTime();
             }
@@ -1474,10 +1474,10 @@
                 passwordSection.style.display = 'none';
                 document.querySelectorAll('.sales-card').forEach(c => c.classList.remove('selected'));
                 currentFilter = 'all';
-                
+
                 // Reset form user
                 resetUserForm();
-                
+
                 // Reset password inputs
                 passwordInput.value = '';
                 adminPasswordInput.value = '';
@@ -1571,20 +1571,20 @@
                                     if (!outletAddress.value && data.display_name) {
                                         outletAddress.value = data.display_name.split(',')[0] || '';
                                     }
-                                    
+
                                     // Isi field kecamatan/desa, kelurahan, kota/kabupaten jika kosong
                                     const address = data.address;
-                                    
+
                                     // Kecamatan/Desa
                                     if (!kecamatanInput.value) {
                                         kecamatanInput.value = address.suburb || address.village || address.town || address.county || '';
                                     }
-                                    
+
                                     // Kelurahan
                                     if (!kelurahanInput.value) {
                                         kelurahanInput.value = address.neighbourhood || address.suburb || address.village || address.hamlet || '';
                                     }
-                                    
+
                                     // Kota/Kabupaten
                                     if (!kotaInput.value) {
                                         kotaInput.value = address.city || address.town || address.county || address.state || '';
@@ -1761,7 +1761,7 @@
                 const pukul = visitTime.value || '-';
                 const phone = outletPhone.value.trim() || '-';
                 const alamat = outletAddress.value.trim() || '-';
-                
+
                 // Data tambahan
                 const kecamatan = kecamatanInput.value.trim() || '-';
                 const kelurahan = kelurahanInput.value.trim() || '-';
