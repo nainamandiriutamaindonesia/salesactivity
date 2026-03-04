@@ -755,8 +755,8 @@
         
         .transaction-row {
             display: grid;
-            grid-template-columns: 3fr 1fr 1fr 1fr 0.3fr;
-            gap: 8px;
+            grid-template-columns: 2.5fr 0.8fr 0.8fr 0.6fr 0.8fr 0.3fr;
+            gap: 5px;
             margin-bottom: 10px;
             align-items: center;
         }
@@ -764,17 +764,19 @@
         .transaction-header {
             font-weight: 700;
             color: #1b5e4a;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             margin-bottom: 5px;
+            text-align: center;
         }
         
         .transaction-input {
             width: 100%;
-            padding: 8px;
+            padding: 8px 4px;
             border: 2px solid #4caf9e;
             border-radius: 12px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             outline: none;
+            text-align: center;
         }
         
         .transaction-input:focus {
@@ -819,6 +821,53 @@
         
         .remove-product:hover {
             color: #a0322b;
+        }
+        
+        .diskon-info {
+            font-size: 0.7rem;
+            color: #2e7d73;
+            font-weight: 600;
+        }
+        /* ===== STYLE UNTUK PESAN TERIMA KASIH ===== */
+        
+        .thankyou-message {
+            background: linear-gradient(145deg, #2e7d73, #1b5e4a);
+            color: white;
+            text-align: center;
+            padding: 20px 12px;
+            border-radius: 60px;
+            font-weight: 800;
+            font-size: 1.8rem;
+            letter-spacing: 2px;
+            margin: 20px 0 25px 0;
+            border: 3px solid #c8f0e3;
+            box-shadow: 0 8px 0 #0e4f40, 0 15px 25px -8px #1b4e40;
+            text-shadow: 2px 2px 0 #0d463a;
+            animation: pop 0.5s ease;
+            word-break: break-word;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .thankyou-message i {
+            font-size: 2.2rem;
+            filter: drop-shadow(2px 2px 0 #0d463a);
+        }
+        
+        @keyframes pop {
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+            80% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
         }
     </style>
 </head>
@@ -909,7 +958,12 @@
                 <button class="logout-btn" id="logoutFromUser"><i class="fas fa-sign-out-alt"></i> logout</button>
             </div>
 
-            <div class="input-grid">
+            <!-- Tempat pesan terima kasih akan muncul setelah submit -->
+            <div id="thankYouContainer" class="thankyou-message hidden">
+                <i class="fas fa-check-circle"></i> TERIMA KASIH TELAH MENGISI
+            </div>
+
+            <div class="input-grid" id="userFormGrid">
                 <div class="field">
                     <div class="field-icon"><i class="fas fa-user-circle"></i></div>
                     <div class="field-content">
@@ -959,14 +1013,14 @@
                     <div class="field-icon"><i class="fas fa-map-signs"></i></div>
                     <div class="field-content">
                         <span class="field-label">kelurahan/desa</span>
-                        <input type="text" class="field-input" id="kecamatan" placeholder="Kecamatan Suka Maju">
+                        <input type="text" class="field-input" id="kelurahan" placeholder="kelurahan Cimuning">
                     </div>
                 </div>
                 <div class="field">
                     <div class="field-icon"><i class="fas fa-map-marked-alt"></i></div>
                     <div class="field-content">
                         <span class="field-label">kecamatan</span>
-                        <input type="text" class="field-input" id="kelurahan" placeholder="Kelurahan Sejahtera">
+                        <input type="text" class="field-input" id="kecamatan" placeholder="Kecamatan Mustikajaya">
                     </div>
                 </div>
                 <div class="field">
@@ -1018,7 +1072,7 @@
                 <!-- ===== FORM TRANSAKSI (muncul jika pilih transaksi) ===== -->
                 <div id="transactionForm" class="transaction-form hidden">
                     <div class="transaction-header">
-                        <i class="fas fa-shopping-bag"></i> Detail Transaksi
+                        <i class="fas fa-shopping-bag"></i> Detail Transaksi (diskon dalam %)
                     </div>
 
                     <div id="productsContainer">
@@ -1102,284 +1156,299 @@
 
     <script>
         (function() {
-            // ========== DATA SALES (8 sales) ==========
-            const SALES_DATA = [{
-                id: 1,
-                name: 'Agus Efendi',
-                password: 'agus123',
-                avatar: 'AE',
-                role: 'Sales Asli'
-            }, {
-                id: 2,
-                name: 'Bustomi Aji',
-                password: 'tomi123',
-                avatar: 'BA',
-                role: 'Sales Asli'
-            }, {
-                id: 3,
-                name: 'Khoirus Sobah',
-                password: 'sobah123',
-                avatar: 'KS',
-                role: 'Sales Asli'
-            }, {
-                id: 4,
-                name: 'Misbahul Khoir',
-                password: 'peter123',
-                avatar: 'MK',
-                role: 'Sales Asli'
-            }, {
-                id: 5,
-                name: 'Muhamad Rofik',
-                password: 'opik123',
-                avatar: 'MR',
-                role: 'Sales Asli'
-            }, {
-                id: 6,
-                name: 'Maryadih Cahya',
-                password: 'cahya123',
-                avatar: 'MC',
-                role: 'Sales Asli'
-            }, {
-                id: 7,
-                name: 'Najat Soemantri',
-                password: 'najat123',
-                avatar: 'NS',
-                role: 'Senior Sales'
-            }, {
-                id: 8,
-                name: 'Sudirman',
-                password: 'slamet123',
-                avatar: 'S',
-                role: 'Sales Manager'
-            }];
+                // ========== DATA SALES (8 sales) ==========
+                const SALES_DATA = [{
+                    id: 1,
+                    name: 'Agus Efendi',
+                    password: 'agus123',
+                    avatar: 'AE',
+                    role: 'Sales Asli'
+                }, {
+                    id: 2,
+                    name: 'Bustomi Aji',
+                    password: 'tomi123',
+                    avatar: 'BA',
+                    role: 'Sales Asli'
+                }, {
+                    id: 3,
+                    name: 'Khoirus Sobah',
+                    password: 'sobah123',
+                    avatar: 'KS',
+                    role: 'Sales Asli'
+                }, {
+                    id: 4,
+                    name: 'Misbahul Khoir',
+                    password: 'peter123',
+                    avatar: 'MK',
+                    role: 'Sales Asli'
+                }, {
+                    id: 5,
+                    name: 'Muhamad Rofik',
+                    password: 'opik123',
+                    avatar: 'MR',
+                    role: 'Sales Asli'
+                }, {
+                    id: 6,
+                    name: 'Maryadih Cahya',
+                    password: 'cahya123',
+                    avatar: 'MC',
+                    role: 'Sales Asli'
+                }, {
+                    id: 7,
+                    name: 'Najat Soemantri',
+                    password: 'najat123',
+                    avatar: 'NS',
+                    role: 'Senior Sales'
+                }, {
+                    id: 8,
+                    name: 'Sudirman',
+                    password: 'slamet123',
+                    avatar: 'S',
+                    role: 'Sales Manager'
+                }];
 
-            const ADMIN_PASSWORD = 'rahasia17';
+                const ADMIN_PASSWORD = 'rahasia17';
 
-            // ========== ELEMEN ==========
-            const loginSection = document.getElementById('loginSection');
-            const adminLoginSection = document.getElementById('adminLoginSection');
-            const userSection = document.getElementById('userSection');
-            const adminSection = document.getElementById('adminSection');
+                // ========== ELEMEN ==========
+                const loginSection = document.getElementById('loginSection');
+                const adminLoginSection = document.getElementById('adminLoginSection');
+                const userSection = document.getElementById('userSection');
+                const adminSection = document.getElementById('adminSection');
 
-            const salesGrid = document.getElementById('salesGrid');
-            const passwordSection = document.getElementById('passwordSection');
-            const selectedAvatar = document.getElementById('selectedAvatar');
-            const selectedName = document.getElementById('selectedName');
-            const passwordInput = document.getElementById('passwordInput');
-            const loginSubmitBtn = document.getElementById('loginSubmitBtn');
+                const salesGrid = document.getElementById('salesGrid');
+                const passwordSection = document.getElementById('passwordSection');
+                const selectedAvatar = document.getElementById('selectedAvatar');
+                const selectedName = document.getElementById('selectedName');
+                const passwordInput = document.getElementById('passwordInput');
+                const loginSubmitBtn = document.getElementById('loginSubmitBtn');
 
-            const adminLoginBtn = document.getElementById('adminLoginBtn');
-            const backToSalesBtn = document.getElementById('backToSalesBtn');
-            const adminPasswordInput = document.getElementById('adminPasswordInput');
-            const adminLoginSubmitBtn = document.getElementById('adminLoginSubmitBtn');
+                const adminLoginBtn = document.getElementById('adminLoginBtn');
+                const backToSalesBtn = document.getElementById('backToSalesBtn');
+                const adminPasswordInput = document.getElementById('adminPasswordInput');
+                const adminLoginSubmitBtn = document.getElementById('adminLoginSubmitBtn');
 
-            const logoutUser = document.getElementById('logoutFromUser');
-            const logoutAdmin = document.getElementById('logoutFromAdmin');
+                const logoutUser = document.getElementById('logoutFromUser');
+                const logoutAdmin = document.getElementById('logoutFromAdmin');
 
-            const userNameDisplay = document.getElementById('userNameDisplay');
-            const salesName = document.getElementById('salesName');
+                const userNameDisplay = document.getElementById('userNameDisplay');
+                const salesName = document.getElementById('salesName');
 
-            // ========== ELEMEN TAMBAHAN ==========
-            const kecamatanInput = document.getElementById('kecamatan');
-            const kelurahanInput = document.getElementById('kelurahan');
-            const kotaInput = document.getElementById('kota');
+                // ========== ELEMEN TAMBAHAN ==========
+                const kecamatanInput = document.getElementById('kecamatan');
+                const kelurahanInput = document.getElementById('kelurahan');
+                const kotaInput = document.getElementById('kota');
 
-            // ========== STATE ==========
-            let selectedSales = null;
-            let visits = [];
-            let currentFilter = 'all';
-            let products = []; // Untuk menyimpan produk transaksi
-            let currentLat = null;
-            let currentLng = null;
-            let currentPhotoBase64 = null;
-            let currentPhotoName = '';
+                // ========== ELEMEN PESAN TERIMA KASIH ==========
+                const thankYouContainer = document.getElementById('thankYouContainer');
+                const userFormGrid = document.getElementById('userFormGrid');
 
-            // ========== LOAD DATA ==========
-            function loadVisits() {
-                const stored = localStorage.getItem('salesVisits');
-                if (stored) {
-                    try {
-                        visits = JSON.parse(stored);
-                    } catch {
+                // ========== STATE ==========
+                let selectedSales = null;
+                let visits = [];
+                let currentFilter = 'all';
+                let products = []; // Untuk menyimpan produk transaksi
+                let currentLat = null;
+                let currentLng = null;
+                let currentPhotoBase64 = null;
+                let currentPhotoName = '';
+
+                // ========== LOAD DATA ==========
+                function loadVisits() {
+                    const stored = localStorage.getItem('salesVisits');
+                    if (stored) {
+                        try {
+                            visits = JSON.parse(stored);
+                        } catch {
+                            visits = [];
+                        }
+                    } else {
                         visits = [];
                     }
-                } else {
-                    visits = [];
                 }
-            }
-            loadVisits();
+                loadVisits();
 
-            function saveVisits() {
-                localStorage.setItem('salesVisits', JSON.stringify(visits));
-            }
+                function saveVisits() {
+                    localStorage.setItem('salesVisits', JSON.stringify(visits));
+                }
 
-            // ========== RESET FORM USER ==========
-            function resetUserForm() {
-                // Reset semua field input
-                outletName.value = '';
-                outletPhone.value = '';
-                outletAddress.value = '';
-                kecamatanInput.value = '';
-                kelurahanInput.value = '';
-                kotaInput.value = '';
+                // ========== RESET FORM USER ==========
+                function resetUserForm() {
+                    // Reset semua field input
+                    outletName.value = '';
+                    outletPhone.value = '';
+                    outletAddress.value = '';
+                    kecamatanInput.value = '';
+                    kelurahanInput.value = '';
+                    kotaInput.value = '';
 
-                // Reset foto
-                currentPhotoBase64 = null;
-                currentPhotoName = '';
-                photoPreview.src = 'https://placehold.co/50x50/d4ede8/2e7d73?text=foto';
-                photoName.textContent = '';
+                    // Reset foto
+                    currentPhotoBase64 = null;
+                    currentPhotoName = '';
+                    photoPreview.src = 'https://placehold.co/50x50/d4ede8/2e7d73?text=foto';
+                    photoName.textContent = '';
 
-                // Reset lokasi
-                locationText.innerText = '📍 posisi belum diambil';
-                mapsLinkContainer.style.display = 'none';
-                currentLat = null;
-                currentLng = null;
+                    // Reset lokasi
+                    locationText.innerText = '📍 posisi belum diambil';
+                    mapsLinkContainer.style.display = 'none';
+                    currentLat = null;
+                    currentLng = null;
 
-                // Reset transaksi
-                products = [];
-                transactionStatus.value = 'none';
-                transactionForm.classList.add('hidden');
-                renderProducts();
+                    // Reset transaksi
+                    products = [];
+                    transactionStatus.value = 'none';
+                    transactionForm.classList.add('hidden');
+                    renderProducts();
 
-                // Set default datetime
-                setDefaultDateTime();
-            }
+                    // Set default datetime
+                    setDefaultDateTime();
+                }
 
-            // ========== RENDER SALES GRID ==========
-            function renderSalesGrid() {
-                let html = '';
-                SALES_DATA.forEach(sales => {
-                    html += `
+                // ========== RENDER SALES GRID ==========
+                function renderSalesGrid() {
+                    let html = '';
+                    SALES_DATA.forEach(sales => {
+                        html += `
                         <div class="sales-card" data-id="${sales.id}" data-name="${sales.name}" data-password="${sales.password}" data-role="${sales.role}">
                             <div class="sales-avatar">${sales.avatar}</div>
                             <div class="sales-name">${sales.name}</div>
                             <div class="sales-role">${sales.role}</div>
                         </div>
                     `;
-                });
-                salesGrid.innerHTML = html;
-
-                // Add click event to sales cards
-                document.querySelectorAll('.sales-card').forEach(card => {
-                    card.addEventListener('click', () => {
-                        // Remove selected class from all cards
-                        document.querySelectorAll('.sales-card').forEach(c => c.classList.remove('selected'));
-                        // Add selected class to clicked card
-                        card.classList.add('selected');
-
-                        // Get sales data
-                        selectedSales = {
-                            id: card.dataset.id,
-                            name: card.dataset.name,
-                            password: card.dataset.password,
-                            role: card.dataset.role
-                        };
-
-                        // Update selected info
-                        selectedAvatar.innerHTML = `<i class="fas fa-user"></i>`;
-                        selectedName.textContent = selectedSales.name;
-
-                        // Show password section
-                        passwordSection.style.display = 'block';
-                        passwordInput.value = '';
-                        loginSubmitBtn.disabled = true;
-                        passwordInput.focus();
                     });
-                });
-            }
+                    salesGrid.innerHTML = html;
 
-            // ========== RENDER FILTER SALES (ADMIN) ==========
-            function renderSalesFilter() {
-                const filterGrid = document.getElementById('salesFilter');
-                let html = '<div class="filter-chip active" data-filter="all">Semua</div>';
+                    // Add click event to sales cards
+                    document.querySelectorAll('.sales-card').forEach(card => {
+                        card.addEventListener('click', () => {
+                            // Remove selected class from all cards
+                            document.querySelectorAll('.sales-card').forEach(c => c.classList.remove('selected'));
+                            // Add selected class to clicked card
+                            card.classList.add('selected');
 
-                SALES_DATA.forEach(sales => {
-                    html += `<div class="filter-chip" data-filter="${sales.name}">${sales.name.split(' ')[0]}</div>`;
-                });
+                            // Get sales data
+                            selectedSales = {
+                                id: card.dataset.id,
+                                name: card.dataset.name,
+                                password: card.dataset.password,
+                                role: card.dataset.role
+                            };
 
-                filterGrid.innerHTML = html;
+                            // Update selected info
+                            selectedAvatar.innerHTML = `<i class="fas fa-user"></i>`;
+                            selectedName.textContent = selectedSales.name;
 
-                // Add click events
-                document.querySelectorAll('.filter-chip').forEach(chip => {
-                    chip.addEventListener('click', () => {
-                        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-                        chip.classList.add('active');
-                        currentFilter = chip.dataset.filter;
-                        renderAdminDashboard();
+                            // Show password section
+                            passwordSection.style.display = 'block';
+                            passwordInput.value = '';
+                            loginSubmitBtn.disabled = true;
+                            passwordInput.focus();
+                        });
                     });
-                });
-            }
-
-            // ========== RENDER ADMIN DASHBOARD ==========
-            function renderAdminDashboard() {
-                const totalKunjungan = document.getElementById('totalKunjungan');
-                const totalSales = document.getElementById('totalSales');
-                const totalOutlet = document.getElementById('totalOutlet');
-                const totalTransaksi = document.getElementById('totalTransaksi');
-                const adminDataList = document.getElementById('adminDataList');
-                const adminDataCount = document.getElementById('adminDataCount');
-
-                // Filter data based on selected sales
-                let filteredVisits = visits;
-                if (currentFilter !== 'all') {
-                    filteredVisits = visits.filter(v => v.sales === currentFilter);
                 }
 
-                // Statistics
-                totalKunjungan.innerText = filteredVisits.length;
+                // ========== RENDER FILTER SALES (ADMIN) ==========
+                function renderSalesFilter() {
+                    const filterGrid = document.getElementById('salesFilter');
+                    let html = '<div class="filter-chip active" data-filter="all">Semua</div>';
 
-                const activeSales = new Set(filteredVisits.map(v => v.sales).filter(Boolean));
-                totalSales.innerText = activeSales.size;
+                    SALES_DATA.forEach(sales => {
+                        html += `<div class="filter-chip" data-filter="${sales.name}">${sales.name.split(' ')[0]}</div>`;
+                    });
 
-                const uniqueOutlets = new Set(filteredVisits.map(v => v.outlet).filter(Boolean));
-                totalOutlet.innerText = uniqueOutlets.size;
+                    filterGrid.innerHTML = html;
 
-                const withTransaksi = filteredVisits.filter(v => v.transaction && v.transaction.products && v.transaction.products.length > 0).length;
-                totalTransaksi.innerText = withTransaksi;
+                    // Add click events
+                    document.querySelectorAll('.filter-chip').forEach(chip => {
+                        chip.addEventListener('click', () => {
+                            document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+                            chip.classList.add('active');
+                            currentFilter = chip.dataset.filter;
+                            renderAdminDashboard();
+                        });
+                    });
+                }
 
-                adminDataCount.innerText = filteredVisits.length;
+                // ========== RENDER ADMIN DASHBOARD ==========
+                function renderAdminDashboard() {
+                    const totalKunjungan = document.getElementById('totalKunjungan');
+                    const totalSales = document.getElementById('totalSales');
+                    const totalOutlet = document.getElementById('totalOutlet');
+                    const totalTransaksi = document.getElementById('totalTransaksi');
+                    const adminDataList = document.getElementById('adminDataList');
+                    const adminDataCount = document.getElementById('adminDataCount');
 
-                // Render data list
-                if (filteredVisits.length === 0) {
-                    adminDataList.innerHTML = '<div class="empty-data">Belum ada kunjungan</div>';
-                } else {
-                    let html = '';
-                    filteredVisits.slice().reverse().forEach(v => {
-                        const mapsLink = v.mapsUrl ?
-                            `<a href="${v.mapsUrl}" target="_blank" class="maps-link"><i class="fas fa-map-marked-alt"></i> Buka Maps</a>` :
-                            '-';
+                    // Filter data based on selected sales
+                    let filteredVisits = visits;
+                    if (currentFilter !== 'all') {
+                        filteredVisits = visits.filter(v => v.sales === currentFilter);
+                    }
 
-                        const fotoThumb = v.fotoBase64 ?
-                            `<img src="${v.fotoBase64}" class="photo-thumb" onclick="showPhoto('${v.fotoBase64}', '${v.outlet} - ${v.tanggal} (${v.sales})')">` :
-                            '-';
+                    // Statistics
+                    totalKunjungan.innerText = filteredVisits.length;
 
-                        // Tampilkan detail transaksi jika ada
-                        let transactionHtml = '';
-                        if (v.transaction && v.transaction.products && v.transaction.products.length > 0) {
-                            let productsList = '';
-                            let total = 0;
-                            v.transaction.products.forEach(p => {
-                                productsList += `<div>• ${p.name} (${p.qty} x Rp ${formatNumber(p.price)}) = Rp ${formatNumber(p.subtotal)}</div>`;
-                                total += p.subtotal;
-                            });
-                            transactionHtml = `
+                    const activeSales = new Set(filteredVisits.map(v => v.sales).filter(Boolean));
+                    totalSales.innerText = activeSales.size;
+
+                    const uniqueOutlets = new Set(filteredVisits.map(v => v.outlet).filter(Boolean));
+                    totalOutlet.innerText = uniqueOutlets.size;
+
+                    const withTransaksi = filteredVisits.filter(v => v.transaction && v.transaction.products && v.transaction.products.length > 0).length;
+                    totalTransaksi.innerText = withTransaksi;
+
+                    adminDataCount.innerText = filteredVisits.length;
+
+                    // Render data list
+                    if (filteredVisits.length === 0) {
+                        adminDataList.innerHTML = '<div class="empty-data">Belum ada kunjungan</div>';
+                    } else {
+                        let html = '';
+                        filteredVisits.slice().reverse().forEach(v => {
+                            const mapsLink = v.mapsUrl ?
+                                `<a href="${v.mapsUrl}" target="_blank" class="maps-link"><i class="fas fa-map-marked-alt"></i> Buka Maps</a>` :
+                                '-';
+
+                            const fotoThumb = v.fotoBase64 ?
+                                `<img src="${v.fotoBase64}" class="photo-thumb" onclick="showPhoto('${v.fotoBase64}', '${v.outlet} - ${v.tanggal} (${v.sales})')">` :
+                                '-';
+
+                            // Tampilkan detail transaksi jika ada
+                            let transactionHtml = '';
+                            if (v.transaction && v.transaction.products && v.transaction.products.length > 0) {
+                                let productsList = '';
+                                let total = 0;
+                                v.transaction.products.forEach(p => {
+                                    // Hitung subtotal setelah diskon
+                                    const subtotal = p.qty * p.price;
+                                    const diskon = p.diskon || 0;
+                                    const subtotalAfterDiskon = subtotal - (subtotal * diskon / 100);
+
+                                    productsList += `<div>• ${p.name} (${p.qty} x Rp ${formatNumber(p.price)})`;
+                                    if (diskon > 0) {
+                                        productsList += ` - diskon ${diskon}% = Rp ${formatNumber(subtotalAfterDiskon)}`;
+                                    } else {
+                                        productsList += ` = Rp ${formatNumber(subtotal)}`;
+                                    }
+                                    productsList += `</div>`;
+                                    total += subtotalAfterDiskon;
+                                });
+                                transactionHtml = `
                                 <div class="transaction-badge">💰 Transaksi: Rp ${formatNumber(total)}</div>
                                 <div class="transaction-details">${productsList}</div>
                             `;
-                        } else {
-                            transactionHtml = '<div class="transaction-badge">⛔ Tidak Ada Transaksi</div>';
-                        }
+                            } else {
+                                transactionHtml = '<div class="transaction-badge">⛔ Tidak Ada Transaksi</div>';
+                            }
 
-                        // Tampilkan data alamat lengkap dengan kecamatan/desa, kelurahan, kota/kabupaten
-                        let alamatLengkap = v.alamat || '-';
-                        if (v.kecamatan || v.kelurahan || v.kota) {
-                            alamatLengkap += '<br>';
-                            if (v.kecamatan && v.kecamatan !== '-') alamatLengkap += `Kecamatan: ${escapeHtml(v.kecamatan)}<br>`;
-                            if (v.kelurahan && v.kelurahan !== '-') alamatLengkap += `Kelurahan: ${escapeHtml(v.kelurahan)}<br>`;
-                            if (v.kota && v.kota !== '-') alamatLengkap += `Kota/Kab: ${escapeHtml(v.kota)}`;
-                        }
+                            // Tampilkan data alamat lengkap dengan kecamatan/desa, kelurahan, kota/kabupaten
+                            let alamatLengkap = v.alamat || '-';
+                            if (v.kecamatan || v.kelurahan || v.kota) {
+                                alamatLengkap += '<br>';
+                                if (v.kecamatan && v.kecamatan !== '-') alamatLengkap += `Kecamatan: ${escapeHtml(v.kecamatan)}<br>`;
+                                if (v.kelurahan && v.kelurahan !== '-') alamatLengkap += `Kelurahan: ${escapeHtml(v.kelurahan)}<br>`;
+                                if (v.kota && v.kota !== '-') alamatLengkap += `Kota/Kab: ${escapeHtml(v.kota)}`;
+                            }
 
-                        html += `<div class="entry-item">
+                            html += `<div class="entry-item">
                             <span class="entry-sales-badge">${v.sales || 'N/A'}</span>
                             <span class="label">Sales:</span> <span>${escapeHtml(v.sales)}</span>
                             <span class="label">Outlet:</span> <span>${escapeHtml(v.outlet)}</span>
@@ -1390,305 +1459,330 @@
                             <span class="label">Foto:</span> <span>${fotoThumb}</span>
                             <span class="label">Transaksi:</span> <span>${transactionHtml}</span>
                         </div>`;
-                    });
-                    adminDataList.innerHTML = html;
-                }
-            }
-
-            // ========== LOGIN SALES ==========
-            loginSubmitBtn.addEventListener('click', () => {
-                if (!selectedSales) {
-                    alert('Pilih sales terlebih dahulu!');
-                    return;
+                        });
+                        adminDataList.innerHTML = html;
+                    }
                 }
 
-                const password = passwordInput.value.trim();
-                if (password === selectedSales.password) {
-                    // Set user info
-                    userNameDisplay.textContent = selectedSales.name;
-                    salesName.value = selectedSales.name;
+                // ========== LOGIN SALES ==========
+                loginSubmitBtn.addEventListener('click', () => {
+                    if (!selectedSales) {
+                        alert('Pilih sales terlebih dahulu!');
+                        return;
+                    }
 
-                    // Reset form user sebelum menampilkan
-                    resetUserForm();
+                    const password = passwordInput.value.trim();
+                    if (password === selectedSales.password) {
+                        // Set user info
+                        userNameDisplay.textContent = selectedSales.name;
+                        salesName.value = selectedSales.name;
 
-                    // Switch to user section
+                        // Reset form user sebelum menampilkan
+                        resetUserForm();
+
+                        // Sembunyikan pesan terima kasih jika sebelumnya muncul
+                        thankYouContainer.classList.add('hidden');
+                        userFormGrid.classList.remove('hidden');
+
+                        // Switch to user section
+                        loginSection.classList.add('hidden');
+                        adminLoginSection.classList.add('hidden');
+                        userSection.classList.remove('hidden');
+                        adminSection.classList.add('hidden');
+
+                        // Reset login form
+                        passwordInput.value = '';
+                        passwordSection.style.display = 'none';
+                        document.querySelectorAll('.sales-card').forEach(c => c.classList.remove('selected'));
+                        selectedSales = null;
+                    } else {
+                        alert('Password salah!');
+                        passwordInput.value = '';
+                        passwordInput.focus();
+                    }
+                });
+
+                // ========== LOGIN ADMIN ==========
+                adminLoginBtn.addEventListener('click', () => {
                     loginSection.classList.add('hidden');
-                    adminLoginSection.classList.add('hidden');
-                    userSection.classList.remove('hidden');
-                    adminSection.classList.add('hidden');
-
-                    // Reset login form
-                    passwordInput.value = '';
-                    passwordSection.style.display = 'none';
-                    document.querySelectorAll('.sales-card').forEach(c => c.classList.remove('selected'));
-                    selectedSales = null;
-                } else {
-                    alert('Password salah!');
-                    passwordInput.value = '';
-                    passwordInput.focus();
-                }
-            });
-
-            // ========== LOGIN ADMIN ==========
-            adminLoginBtn.addEventListener('click', () => {
-                loginSection.classList.add('hidden');
-                adminLoginSection.classList.remove('hidden');
-                adminPasswordInput.value = '';
-                adminPasswordInput.focus();
-            });
-
-            backToSalesBtn.addEventListener('click', () => {
-                adminLoginSection.classList.add('hidden');
-                loginSection.classList.remove('hidden');
-                adminPasswordInput.value = '';
-            });
-
-            adminLoginSubmitBtn.addEventListener('click', () => {
-                const password = adminPasswordInput.value.trim();
-                if (password === ADMIN_PASSWORD) {
-                    loginSection.classList.add('hidden');
-                    adminLoginSection.classList.add('hidden');
-                    userSection.classList.add('hidden');
-                    adminSection.classList.remove('hidden');
-
-                    renderSalesFilter();
-                    renderAdminDashboard();
-
-                    adminPasswordInput.value = '';
-                } else {
-                    alert('Password admin salah!');
+                    adminLoginSection.classList.remove('hidden');
                     adminPasswordInput.value = '';
                     adminPasswordInput.focus();
-                }
-            });
+                });
 
-            // ========== LOGOUT ==========
-            function logout() {
-                loginSection.classList.remove('hidden');
-                adminLoginSection.classList.add('hidden');
-                userSection.classList.add('hidden');
-                adminSection.classList.add('hidden');
+                backToSalesBtn.addEventListener('click', () => {
+                    adminLoginSection.classList.add('hidden');
+                    loginSection.classList.remove('hidden');
+                    adminPasswordInput.value = '';
+                });
 
-                // Reset semua state
-                selectedSales = null;
-                passwordSection.style.display = 'none';
-                document.querySelectorAll('.sales-card').forEach(c => c.classList.remove('selected'));
-                currentFilter = 'all';
+                adminLoginSubmitBtn.addEventListener('click', () => {
+                    const password = adminPasswordInput.value.trim();
+                    if (password === ADMIN_PASSWORD) {
+                        loginSection.classList.add('hidden');
+                        adminLoginSection.classList.add('hidden');
+                        userSection.classList.add('hidden');
+                        adminSection.classList.remove('hidden');
 
-                // Reset form user
-                resetUserForm();
+                        renderSalesFilter();
+                        renderAdminDashboard();
 
-                // Reset password inputs
-                passwordInput.value = '';
-                adminPasswordInput.value = '';
-            }
-
-            logoutUser.addEventListener('click', logout);
-            logoutAdmin.addEventListener('click', logout);
-
-            // ========== FITUR USER ==========
-            const outletName = document.getElementById('outletName');
-            const visitDate = document.getElementById('visitDate');
-            const visitTime = document.getElementById('visitTime');
-            const outletPhone = document.getElementById('outletPhone');
-            const outletAddress = document.getElementById('outletAddress');
-            const locationText = document.getElementById('locationText');
-            const mapsLinkContainer = document.getElementById('mapsLinkContainer');
-            const mapsLink = document.getElementById('mapsLink');
-            const photoPreview = document.getElementById('photoPreview');
-            const photoName = document.getElementById('photoName');
-            const cameraInput = document.getElementById('cameraInput');
-            const takePhotoBtn = document.getElementById('takePhotoBtn');
-            const getLocationBtn = document.getElementById('getLocationBtn');
-            const saveButton = document.getElementById('saveButton');
-
-            // Elemen transaksi
-            const transactionStatus = document.getElementById('transactionStatus');
-            const transactionForm = document.getElementById('transactionForm');
-            const productsContainer = document.getElementById('productsContainer');
-            const addProductBtn = document.getElementById('addProductBtn');
-            const grandTotal = document.getElementById('grandTotal');
-
-            function setDefaultDateTime() {
-                const today = new Date();
-                const yyyy = today.getFullYear();
-                const mm = String(today.getMonth() + 1).padStart(2, '0');
-                const dd = String(today.getDate()).padStart(2, '0');
-                visitDate.value = `${yyyy}-${mm}-${dd}`;
-                visitTime.value = `${String(today.getHours()).padStart(2,'0')}:${String(today.getMinutes()).padStart(2,'0')}`;
-            }
-
-            window.openGoogleMaps = function() {
-                if (currentLat && currentLng) {
-                    window.open(`https://www.google.com/maps?q=${currentLat},${currentLng}`, '_blank');
-                }
-            };
-
-            takePhotoBtn.addEventListener('click', () => cameraInput.click());
-
-            cameraInput.addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    currentPhotoName = file.name;
-                    photoName.textContent = `📷 ${file.name.substring(0,15)}...`;
-
-                    const reader = new FileReader();
-                    reader.onload = (ev) => {
-                        currentPhotoBase64 = ev.target.result;
-                        photoPreview.src = ev.target.result;
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-
-            getLocationBtn.addEventListener('click', () => {
-                if (!navigator.geolocation) {
-                    alert('Geolocation tidak didukung');
-                    return;
-                }
-                locationText.innerText = '⏳ mengambil lokasi...';
-                mapsLinkContainer.style.display = 'none';
-
-                navigator.geolocation.getCurrentPosition(
-                    (pos) => {
-                        currentLat = pos.coords.latitude;
-                        currentLng = pos.coords.longitude;
-
-                        const latFixed = currentLat.toFixed(6);
-                        const lngFixed = currentLng.toFixed(6);
-
-                        locationText.innerText = `📍 ${latFixed}, ${lngFixed}`;
-
-                        mapsLink.href = `https://www.google.com/maps?q=${currentLat},${currentLng}`;
-                        mapsLinkContainer.style.display = 'block';
-
-                        // Reverse geocoding untuk mendapatkan alamat lengkap
-                        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${currentLat}&lon=${currentLng}`)
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.address) {
-                                    // Isi field alamat jika kosong
-                                    if (!outletAddress.value && data.display_name) {
-                                        outletAddress.value = data.display_name.split(',')[0] || '';
-                                    }
-
-                                    // Isi field kecamatan/desa, kelurahan, kota/kabupaten jika kosong
-                                    const address = data.address;
-
-                                    // Kecamatan/Desa
-                                    if (!kecamatanInput.value) {
-                                        kecamatanInput.value = address.suburb || address.village || address.town || address.county || '';
-                                    }
-
-                                    // Kelurahan
-                                    if (!kelurahanInput.value) {
-                                        kelurahanInput.value = address.neighbourhood || address.suburb || address.village || address.hamlet || '';
-                                    }
-
-                                    // Kota/Kabupaten
-                                    if (!kotaInput.value) {
-                                        kotaInput.value = address.city || address.town || address.county || address.state || '';
-                                    }
-                                }
-                            })
-                            .catch(() => {});
-                    },
-                    (error) => {
-                        locationText.innerText = '⚠️ gagal ambil lokasi';
-                        console.error(error);
-                    }, {
-                        enableHighAccuracy: true,
-                        timeout: 10000,
-                        maximumAge: 0
+                        adminPasswordInput.value = '';
+                    } else {
+                        alert('Password admin salah!');
+                        adminPasswordInput.value = '';
+                        adminPasswordInput.focus();
                     }
-                );
-            });
+                });
 
-            // ========== FUNGSI TRANSAKSI ==========
+                // ========== LOGOUT ==========
+                function logout() {
+                    loginSection.classList.remove('hidden');
+                    adminLoginSection.classList.add('hidden');
+                    userSection.classList.add('hidden');
+                    adminSection.classList.add('hidden');
 
-            // Tampilkan/sembunyikan form transaksi berdasarkan pilihan
-            transactionStatus.addEventListener('change', () => {
-                if (transactionStatus.value === 'transaction') {
-                    transactionForm.classList.remove('hidden');
-                    if (products.length === 0) {
-                        addProduct(); // Tambah produk pertama otomatis
-                    }
-                } else {
-                    transactionForm.classList.add('hidden');
-                    products = [];
-                    renderProducts();
+                    // Reset semua state
+                    selectedSales = null;
+                    passwordSection.style.display = 'none';
+                    document.querySelectorAll('.sales-card').forEach(c => c.classList.remove('selected'));
+                    currentFilter = 'all';
+
+                    // Reset form user
+                    resetUserForm();
+
+                    // Sembunyikan pesan terima kasih
+                    thankYouContainer.classList.add('hidden');
+                    userFormGrid.classList.remove('hidden');
+
+                    // Reset password inputs
+                    passwordInput.value = '';
+                    adminPasswordInput.value = '';
                 }
-            });
 
-            // Tambah produk baru
-            function addProduct() {
-                const newProduct = {
-                    id: Date.now() + Math.random(),
-                    name: '',
-                    qty: 1,
-                    price: 0,
-                    subtotal: 0
+                logoutUser.addEventListener('click', logout);
+                logoutAdmin.addEventListener('click', logout);
+
+                // ========== FITUR USER ==========
+                const outletName = document.getElementById('outletName');
+                const visitDate = document.getElementById('visitDate');
+                const visitTime = document.getElementById('visitTime');
+                const outletPhone = document.getElementById('outletPhone');
+                const outletAddress = document.getElementById('outletAddress');
+                const locationText = document.getElementById('locationText');
+                const mapsLinkContainer = document.getElementById('mapsLinkContainer');
+                const mapsLink = document.getElementById('mapsLink');
+                const photoPreview = document.getElementById('photoPreview');
+                const photoName = document.getElementById('photoName');
+                const cameraInput = document.getElementById('cameraInput');
+                const takePhotoBtn = document.getElementById('takePhotoBtn');
+                const getLocationBtn = document.getElementById('getLocationBtn');
+                const saveButton = document.getElementById('saveButton');
+
+                // Elemen transaksi
+                const transactionStatus = document.getElementById('transactionStatus');
+                const transactionForm = document.getElementById('transactionForm');
+                const productsContainer = document.getElementById('productsContainer');
+                const addProductBtn = document.getElementById('addProductBtn');
+                const grandTotal = document.getElementById('grandTotal');
+
+                function setDefaultDateTime() {
+                    const today = new Date();
+                    const yyyy = today.getFullYear();
+                    const mm = String(today.getMonth() + 1).padStart(2, '0');
+                    const dd = String(today.getDate()).padStart(2, '0');
+                    visitDate.value = `${yyyy}-${mm}-${dd}`;
+                    visitTime.value = `${String(today.getHours()).padStart(2,'0')}:${String(today.getMinutes()).padStart(2,'0')}`;
+                }
+
+                window.openGoogleMaps = function() {
+                    if (currentLat && currentLng) {
+                        window.open(`https://www.google.com/maps?q=${currentLat},${currentLng}`, '_blank');
+                    }
                 };
-                products.push(newProduct);
-                renderProducts();
-            }
 
-            // Hapus produk
-            function removeProduct(id) {
-                products = products.filter(p => p.id !== id);
-                renderProducts();
-                if (products.length === 0) {
-                    // Jika tidak ada produk, reset total
-                    grandTotal.innerHTML = 'Total: Rp 0';
-                }
-            }
+                takePhotoBtn.addEventListener('click', () => cameraInput.click());
 
-            // Update produk
-            function updateProduct(id, field, value) {
-                const product = products.find(p => p.id === id);
-                if (product) {
-                    if (field === 'name') {
-                        product.name = value;
-                    } else if (field === 'qty') {
-                        product.qty = parseInt(value) || 0;
-                    } else if (field === 'price') {
-                        product.price = parseInt(value) || 0;
+                cameraInput.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        currentPhotoName = file.name;
+                        photoName.textContent = `📷 ${file.name.substring(0,15)}...`;
+
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                            currentPhotoBase64 = ev.target.result;
+                            photoPreview.src = ev.target.result;
+                        };
+                        reader.readAsDataURL(file);
                     }
-                    product.subtotal = product.qty * product.price;
+                });
+
+                getLocationBtn.addEventListener('click', () => {
+                    if (!navigator.geolocation) {
+                        alert('Geolocation tidak didukung');
+                        return;
+                    }
+                    locationText.innerText = '⏳ mengambil lokasi...';
+                    mapsLinkContainer.style.display = 'none';
+
+                    navigator.geolocation.getCurrentPosition(
+                        (pos) => {
+                            currentLat = pos.coords.latitude;
+                            currentLng = pos.coords.longitude;
+
+                            const latFixed = currentLat.toFixed(6);
+                            const lngFixed = currentLng.toFixed(6);
+
+                            locationText.innerText = `📍 ${latFixed}, ${lngFixed}`;
+
+                            mapsLink.href = `https://www.google.com/maps?q=${currentLat},${currentLng}`;
+                            mapsLinkContainer.style.display = 'block';
+
+                            // Reverse geocoding untuk mendapatkan alamat lengkap
+                            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${currentLat}&lon=${currentLng}`)
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.address) {
+                                        // Isi field alamat jika kosong
+                                        if (!outletAddress.value && data.display_name) {
+                                            outletAddress.value = data.display_name.split(',')[0] || '';
+                                        }
+
+                                        // Isi field kecamatan/desa, kelurahan, kota/kabupaten jika kosong
+                                        const address = data.address;
+
+                                        // Kecamatan/Desa
+                                        if (!kecamatanInput.value) {
+                                            kecamatanInput.value = address.suburb || address.village || address.town || address.county || '';
+                                        }
+
+                                        // Kelurahan
+                                        if (!kelurahanInput.value) {
+                                            kelurahanInput.value = address.neighbourhood || address.suburb || address.village || address.hamlet || '';
+                                        }
+
+                                        // Kota/Kabupaten
+                                        if (!kotaInput.value) {
+                                            kotaInput.value = address.city || address.town || address.county || address.state || '';
+                                        }
+                                    }
+                                })
+                                .catch(() => {});
+                        },
+                        (error) => {
+                            locationText.innerText = '⚠️ gagal ambil lokasi';
+                            console.error(error);
+                        }, {
+                            enableHighAccuracy: true,
+                            timeout: 10000,
+                            maximumAge: 0
+                        }
+                    );
+                });
+
+                // ========== FUNGSI TRANSAKSI ==========
+
+                // Tampilkan/sembunyikan form transaksi berdasarkan pilihan
+                transactionStatus.addEventListener('change', () => {
+                    if (transactionStatus.value === 'transaction') {
+                        transactionForm.classList.remove('hidden');
+                        if (products.length === 0) {
+                            addProduct(); // Tambah produk pertama otomatis
+                        }
+                    } else {
+                        transactionForm.classList.add('hidden');
+                        products = [];
+                        renderProducts();
+                    }
+                });
+
+                // Tambah produk baru
+                function addProduct() {
+                    const newProduct = {
+                        id: Date.now() + Math.random(),
+                        name: '',
+                        qty: 1,
+                        price: 0,
+                        diskon: 0, // diskon dalam persen
+                        subtotal: 0
+                    };
+                    products.push(newProduct);
                     renderProducts();
                 }
-            }
 
-            // Hitung total semua produk
-            function calculateTotal() {
-                return products.reduce((sum, p) => sum + (p.subtotal || 0), 0);
-            }
-
-            // Render produk ke HTML
-            function renderProducts() {
-                if (products.length === 0) {
-                    productsContainer.innerHTML = '<div style="text-align:center; color:#4caf9e; padding:10px;">Belum ada produk</div>';
-                    grandTotal.innerHTML = 'Total: Rp 0';
-                    return;
+                // Hapus produk
+                function removeProduct(id) {
+                    products = products.filter(p => p.id !== id);
+                    renderProducts();
+                    if (products.length === 0) {
+                        // Jika tidak ada produk, reset total
+                        grandTotal.innerHTML = 'Total: Rp 0';
+                    }
                 }
 
-                let html = `
+                // Update produk
+                function updateProduct(id, field, value) {
+                    const product = products.find(p => p.id === id);
+                    if (product) {
+                        if (field === 'name') {
+                            product.name = value;
+                        } else if (field === 'qty') {
+                            product.qty = parseInt(value) || 0;
+                        } else if (field === 'price') {
+                            product.price = parseInt(value) || 0;
+                        } else if (field === 'diskon') {
+                            product.diskon = parseFloat(value) || 0;
+                            if (product.diskon < 0) product.diskon = 0;
+                            if (product.diskon > 100) product.diskon = 100;
+                        }
+
+                        // Hitung subtotal setelah diskon
+                        const subtotalSebelumDiskon = product.qty * product.price;
+                        product.subtotal = subtotalSebelumDiskon - (subtotalSebelumDiskon * product.diskon / 100);
+
+                        renderProducts();
+                    }
+                }
+
+                // Hitung total semua produk
+                function calculateTotal() {
+                    return products.reduce((sum, p) => sum + (p.subtotal || 0), 0);
+                }
+
+                // Render produk ke HTML
+                function renderProducts() {
+                    if (products.length === 0) {
+                        productsContainer.innerHTML = '<div style="text-align:center; color:#4caf9e; padding:10px;">Belum ada produk</div>';
+                        grandTotal.innerHTML = 'Total: Rp 0';
+                        return;
+                    }
+
+                    let html = `
                     <div class="transaction-row transaction-header">
                         <div>Nama Produk</div>
                         <div>Qty</div>
                         <div>Harga</div>
+                        <div>Diskon %</div>
                         <div>Subtotal</div>
                         <div></div>
                     </div>
                 `;
 
-                products.forEach(product => {
-                    html += `
+                    products.forEach(product => {
+                                const subtotalSebelumDiskon = product.qty * product.price;
+                                const subtotalAfterDiskon = product.subtotal || 0;
+
+                                html += `
                         <div class="transaction-row" id="product-${product.id}">
                             <input type="text" class="transaction-input" placeholder="Nama produk" value="${escapeHtml(product.name || '')}" onchange="window.updateProduct(${product.id}, 'name', this.value)">
                             <input type="number" class="transaction-input" min="1" value="${product.qty || 1}" onchange="window.updateProduct(${product.id}, 'qty', this.value)">
                             <input type="number" class="transaction-input" min="0" value="${product.price || 0}" onchange="window.updateProduct(${product.id}, 'price', this.value)">
-                            <div style="text-align:right; font-weight:600;">Rp ${formatNumber(product.subtotal || 0)}</div>
+                            <input type="number" class="transaction-input" min="0" max="100" step="1" value="${product.diskon || 0}" onchange="window.updateProduct(${product.id}, 'diskon', this.value)">
+                            <div style="text-align:right; font-weight:600; font-size:0.8rem;">
+                                Rp ${formatNumber(subtotalAfterDiskon)}
+                                ${product.diskon > 0 ? `<br><span class="diskon-info">(diskon ${product.diskon}%)</span>` : ''}
+                            </div>
                             <div class="remove-product" onclick="window.removeProduct(${product.id})"><i class="fas fa-times-circle"></i></div>
                         </div>
                     `;
@@ -1709,7 +1803,7 @@
             // Format angka
             function formatNumber(num) {
                 if (num === undefined || num === null) return '0';
-                return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                return Math.round(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
             }
 
             // Escape HTML
@@ -1734,7 +1828,7 @@
                 addProduct();
             });
 
-            // ========== SAVE KUNJUNGAN ==========
+            // ========== SAVE KUNJUNGAN & TAMPILKAN PESAN TERIMA KASIH ==========
             saveButton.addEventListener('click', () => {
                 // Validasi field wajib
                 if (!outletName.value.trim()) {
@@ -1823,10 +1917,21 @@
                 visits.push(newVisit);
                 saveVisits();
 
-                alert('✅ Kunjungan tersimpan!');
+                // 🔥 TAMPILKAN PESAN TERIMA KASIH
+                thankYouContainer.classList.remove('hidden');
+                userFormGrid.classList.add('hidden'); // Sembunyikan form
+                saveButton.classList.add('hidden'); // Sembunyikan tombol simpan
 
-                // Reset form
-                resetUserForm();
+                // Setelah 4 detik, reset form dan munculkan kembali form + tombol
+                setTimeout(() => {
+                    // Reset semua field (panggil fungsi reset yang sudah ada)
+                    resetUserForm();
+
+                    // Sembunyikan pesan, tampilkan form dan tombol
+                    thankYouContainer.classList.add('hidden');
+                    userFormGrid.classList.remove('hidden');
+                    saveButton.classList.remove('hidden');
+                }, 4000); // 4000 ms = 4 detik
             });
 
             // ========== MODAL FOTO ==========
@@ -1848,7 +1953,7 @@
                 }
 
                 const rows = [
-                    ['Nama Sales', 'Tanggal', 'Pukul', 'Nama Outlet', 'No Telp', 'Alamat', 'Kecamatan/Desa', 'Kelurahan', 'Kota/Kabupaten', 'Koordinat', 'Link Google Maps', 'Nama File Foto', 'Status Transaksi', 'Detail Produk', 'Total Transaksi']
+                    ['Nama Sales', 'Tanggal', 'Pukul', 'Nama Outlet', 'No Telp', 'Alamat', 'Kecamatan/Desa', 'Kelurahan', 'Kota/Kabupaten', 'Koordinat', 'Link Google Maps', 'Nama File Foto', 'Status Transaksi', 'Detail Produk (dengan diskon)', 'Total Transaksi']
                 ];
 
                 visits.forEach(v => {
@@ -1858,7 +1963,12 @@
 
                     if (v.transaction && v.transaction.products && v.transaction.products.length > 0) {
                         statusTransaksi = 'Ada Transaksi';
-                        detailProduk = v.transaction.products.map(p => `${p.name} (${p.qty} x ${p.price})`).join('; ');
+                        detailProduk = v.transaction.products.map(p => {
+                            const subtotalSebelum = p.qty * p.price;
+                            const diskon = p.diskon || 0;
+                            const subtotalSetelah = subtotalSebelum - (subtotalSebelum * diskon / 100);
+                            return `${p.name} (${p.qty} x ${p.price}${diskon > 0 ? ` - ${diskon}%` : ''} = ${subtotalSetelah})`;
+                        }).join('; ');
                         totalTransaksi = v.transaction.total;
                     }
 
